@@ -1,0 +1,7 @@
+Manifest.txt
+README.txt
+Rakefile
+bin/chit
+lib/chit.rb
+lib/wrap.rb
+resources/chitrc

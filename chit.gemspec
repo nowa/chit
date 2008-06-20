@@ -1,11 +1,11 @@
 Gem::Specification.new do |s|
   s.name = %q{chit}
-  s.version = "0.0.3"
+  s.version = "0.0.4"
 
   s.specification_version = 2 if s.respond_to? :specification_version=
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
-  s.authors = ["Robin Lu"]
+  s.authors = ["Robin Lu", "nowa"]
   s.date = %q{2008-06-19}
   s.default_executable = %q{chit}
   s.description = %q{Chit is A command line tool for cheat sheet utility based on git.}
@@ -14,7 +14,7 @@ Gem::Specification.new do |s|
   s.extra_rdoc_files = ["Manifest.txt", "README.txt"]
   s.files = ["Manifest.txt", "README.txt", "Rakefile", "bin/chit", "lib/chit.rb", "lib/wrap.rb", "resources/chitrc", "test/test_chit.rb"]
   s.has_rdoc = true
-  s.homepage = %q{http://github.com/robin/chit}
+  s.homepage = %q{http://github.com/nowa/chit}
   s.rdoc_options = ["--main", "README.txt"]
   s.require_paths = ["lib"]
   s.rubyforge_project = %q{chit}
