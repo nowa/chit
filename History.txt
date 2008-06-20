@@ -1,3 +1,11 @@
+=== 0.0.4 / 2008-06-20
+
+* unlimited repositoty
+
+=== 0.0.3 / 2008-06-20
+
+* the version robin first published
+
 === 0.0.1 / 2008-06-19
 
 * Birthday!

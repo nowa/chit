@@ -3,7 +3,7 @@ $:.unshift File.dirname(__FILE__)
 
 module Chit
   extend self
-  VERSION = '0.0.4'
+  VERSION = '0.0.5'
   
   defaults = {
     'root'  => "#{ENV['HOME']}/.chit"
@@ -202,27 +202,28 @@ module Chit
   end
   
   private
-  def editor
-    ENV['VISUAL'] || ENV['EDITOR'] || "vim"
-  end
   
-  def write_to_tempfile(title, body = nil)
-    title = title.gsub(/\/|::/, '-')
-    # god dammit i hate tempfile, this is so messy but i think it's
-    # the only way.
-    tempfile = Tempfile.new(title + '.cheat')
-    tempfile.write(body) if body
-    tempfile.close
-    system "#{editor} #{tempfile.path}"
-    tempfile.open
-    body = tempfile.read
-    tempfile.close
-    body
-  end
+    def editor
+      ENV['VISUAL'] || ENV['EDITOR'] || "vim"
+    end
   
-  def all_sheets
-    @git.ls_files.to_a.map {|f| 
-      f[0][0..((f[0].rindex('.')||0) - 1)]}
-  end
+    def write_to_tempfile(title, body = nil)
+      title = title.gsub(/\/|::/, '-')
+      # god dammit i hate tempfile, this is so messy but i think it's
+      # the only way.
+      tempfile = Tempfile.new(title + '.cheat')
+      tempfile.write(body) if body
+      tempfile.close
+      system "#{editor} #{tempfile.path}"
+      tempfile.open
+      body = tempfile.read
+      tempfile.close
+      body
+    end
+  
+    def all_sheets
+      @git.ls_files.to_a.map {|f| 
+        f[0][0..((f[0].rindex('.')||0) - 1)]}
+    end
   
 end

@@ -1,5 +1,6 @@
 = Chit
 
+http://github.com/nowa/chit
 http://github.com/robin/chit
 
 == DESCRIPTION:
@@ -116,8 +117,10 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 == BY:
 
-Robin Lu
+Robin Lu, nowa
 
 http://www.robinlu.com
+http://www.nowazhu.com
 
 iamawalrus[at]gmail[dot]com
+nowazhu[at]gmail[dot]com
