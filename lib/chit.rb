@@ -195,9 +195,14 @@ module Chit
     if body.strip.empty?
       rm(sheet_file)
     else
-      open(sheet_file,'w') {|f| f << {title => body}.to_yaml}
-      @git.add
-      @git.commit_all("-")
+      begin
+        open(sheet_file,'w') {|f| f << {title => body}.to_yaml}
+        @git.add
+        @git.commit_all("-")
+      rescue Git::GitExecuteError
+        puts "ERROR: can not commit #{@curr_repos} chit."
+        puts $!
+      end
     end
     true
   end
