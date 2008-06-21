@@ -6,12 +6,12 @@ module Chit
   VERSION = '0.0.5'
   
   defaults = {
-    'root'  => "#{ENV['HOME']}/.chit"
+    'root'  => File.join("#{ENV['HOME']}",".chit")
   }
   
-  CHITRC = "#{ENV['HOME']}/.chitrc"
+  CHITRC = File.join("#{ENV['HOME']}",".chitrc")
   
-  FileUtils.cp(File.join(File.dirname(__FILE__), "../resources/chitrc"), CHITRC) unless File.exist?(CHITRC)
+  FileUtils.cp(File.join(File.dirname(__FILE__), "..","resources","chitrc"), CHITRC) unless File.exist?(CHITRC)
   
   CONFIG = defaults.merge(YAML.load_file(CHITRC))
   
@@ -32,7 +32,13 @@ module Chit
     end
 
     unless File.exist?(sheet_file)
-      add(sheet_file)
+      if args.delete('--no-add').nil? && CONFIG['add_if_not_exist']
+        add(sheet_file)
+      else
+        puts "Error!:\n  #{@sheet} not found"
+        puts "Possible sheets:"
+        search_title
+      end
     else
       show(sheet_file)
     end
@@ -58,7 +64,8 @@ module Chit
     add(sheet_file) and return if (args.delete('--add')||args.delete('-a'))
     edit(sheet_file) and return if (args.delete('--edit')||args.delete('-e'))
     rm(sheet_file) and return if (args.delete('--delete')||args.delete('-d'))
-    search and return if (args.delete('--search')||args.delete('-s'))
+    search_title and return if (args.delete('--find')||args.delete('-f'))
+    search_content and return if (args.delete('--search')||args.delete('-s'))
     true
   end
   
@@ -66,7 +73,16 @@ module Chit
     puts all_sheets.sort.join("\n")
   end
   
-  def search
+  def search_content
+    @git.grep(@sheet).each {|file, lines|
+      title = title_of_file(file.split(':')[1])
+      lines.each {|l|
+        puts "#{title}:#{l[0]}:  #{l[1]}"
+      }
+    }
+  end
+  
+  def search_title
     reg = Regexp.compile("^#{@sheet}")
     files = all_sheets.select {|sheet| sheet =~ reg }
     puts files.sort.join("\n")
@@ -178,9 +194,9 @@ module Chit
   
   def add(sheet_file)
     unless File.exist?(sheet_file)
-      breaker = sheet_file.rindex('/')+1
+      breaker = sheet_file.rindex(File::Separator)+1
       path = sheet_file[0,breaker]
-      title = @sheet.gsub(/\//,'::')
+      title = @sheet.split(File::Separator).join('::')
       FileUtils.mkdir_p(path)
       yml = {"#{title}" => ''}.to_yaml
       open(sheet_file, 'w') {|f| f << yml}
@@ -229,7 +245,11 @@ module Chit
   
     def all_sheets
       @git.ls_files.to_a.map {|f| 
-        f[0][0..((f[0].rindex('.')||0) - 1)]}
+        title_of_file(f[0])}
+    end
+  
+    def title_of_file(f)
+      f[0..((f.rindex('.')||0) - 1)]
     end
   
 end

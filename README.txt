@@ -30,8 +30,6 @@ To get a cheat sheet:
 
 $ chit [cheatsheet]
 
-If it does not exist, a new one will be created and waiting for editing. Leave it blank and quit the editor if you don't want to add a new one.
-
 To edit a cheat sheet, use the --edit/-e switch.
 
 $ cheat [cheatsheet] --edit
@@ -42,11 +40,11 @@ $ cheat [cheatsheet] --add
 
 During editing a cheat sheet, empty the content will get the cheat sheet removed.
 
-A prefix '@' indicates the cheat sheet is in private mode. A private cheat sheet is kept in another repository.
+A prefix '@' indicates the cheat sheet is in special mode. In this mode cheat sheet is kept in another repositories.
 
-To get your private cheat sheet:
+To specified repository cheat sheet in:
 
-$ chit @[cheatsheet]
+$ chit @[repos_name] cheatsheet
 
 The prefix '@' works the same for both --edit/-e and --add/-a.
 
@@ -62,11 +60,15 @@ $ chit [all|sheets]
 
 To show all the private cheat sheets:
 
-$ chit @[all|sheets]
+$ chit @[repos_name] all|sheets
 
-To search cheat sheets begin with 'name', use the --search/-s switch
+To find cheat sheets begin with 'name', use the --find/-f switch
 
-$ chit name --search
+$ chit name --find
+
+To search cheat sheets content with 'text', use the --search/-s switch
+
+$ chit text --search
 
 == INSTALL:
 
@@ -79,6 +81,7 @@ chit --init
 Before run 'chit', you may want to config ~/.chitrc which is a YAML file.
 
 * root: local path to store the cheat sheet. By default, it is ~/.chit
+* add_if_not_exist: when set as 'true', if no sheets found, a new one will be created and waiting for editing. Leave it blank and quit the editor if you don't want to add a new one.
 * respo: you can set not only one repository
 * main: 
 * clone-from: where to get the public cheat sheets. You can use git://github.com/robin/chitsheet.git, which is a snap shoot of http://cheat.errtheblog.com/.
