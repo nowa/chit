@@ -47,7 +47,7 @@ module Chit
     is_private = (@sheet =~ /^@(.*)/)
     if is_private
       @curr_repos = $1
-      @sheet = args.length > 1 ? args.shift : 'chit'
+      @sheet = args.length > 0 ? args.shift : 'chit'
     end
 
     working_dir = is_private ? repos_path(@curr_repos) : main_path
@@ -57,6 +57,7 @@ module Chit
     
     add(sheet_file) and return if (args.delete('--add')||args.delete('-a'))
     edit(sheet_file) and return if (args.delete('--edit')||args.delete('-e'))
+    rm(sheet_file) and return if (args.delete('--delete')||args.delete('-d'))
     search and return if (args.delete('--search')||args.delete('-s'))
     true
   end
@@ -135,7 +136,7 @@ module Chit
         CONFIG['repos'][$1] ||= {}
         CONFIG['repos'][$1][$2] = $3
         unless File.exist?(repos_path($1))
-          puts "Initialize chit repository $1 to #{CONFIG['root']}/$1"
+          puts "Initialize chit repository #{$1} to #{CONFIG['root']}/#{$1}"
           Git.init(repos_path($1))
           puts "Private chit initialized."
         end
