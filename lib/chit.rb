@@ -40,7 +40,8 @@ module Chit
         search_title
       end
     else
-      show(sheet_file)
+      format = 'html' if args.delete('--html')
+      show(sheet_file,format)
     end
   end
   
@@ -56,21 +57,43 @@ module Chit
       @sheet = args.length > 0 ? args.shift : 'chit'
     end
 
-    working_dir = is_private ? repos_path(@curr_repos) : main_path
-    @git = Git.open(working_dir)
+    @working_dir = is_private ? repos_path(@curr_repos) : main_path
+    @git = Git.open(@working_dir)
 
-    @fullpath = File.join(working_dir, "#{@sheet}.yml")
+    @fullpath = File.join(@working_dir, "#{@sheet}.yml")
     
     add(sheet_file) and return if (args.delete('--add')||args.delete('-a'))
     edit(sheet_file) and return if (args.delete('--edit')||args.delete('-e'))
     rm(sheet_file) and return if (args.delete('--delete')||args.delete('-d'))
     search_title and return if (args.delete('--find')||args.delete('-f'))
     search_content and return if (args.delete('--search')||args.delete('-s'))
+    
+    if (args.delete('--mv') || args.delete('-m'))
+      target = args.shift
+      mv_to(target) and return if target
+      puts "Target not specified!"
+      return
+    end
     true
   end
   
   def list_all
     puts all_sheets.sort.join("\n")
+  end
+  
+  def mv_to(target)
+    if target =~ /^@(.*)/
+      target = $1
+    end
+    target_path = File.join(@working_dir, "#{target}.yml")
+    prepare_dir(target_path)
+    @git.lib.mv(sheet_file, target_path)
+    sheet = YAML.load(IO.read(target_path)).to_a.first
+    body = sheet[-1]
+    title = parse_title(target)
+    open(target_path,'w') {|f| f << {title => body}.to_yaml}
+    @git.add
+    @git.commit_all(" #{@sheet} moved to #{target}")
   end
   
   def search_content
@@ -178,43 +201,49 @@ module Chit
     File.join(CONFIG['root'], 'private')
   end
   
-  def show(sheet_file)
-    sheet = YAML.load(IO.read(sheet_file)).to_a.first
+  def show(file,format=nil)
+    sheet = YAML.load(IO.read(file)).to_a.first
     sheet[-1] = sheet.last.join("\n") if sheet[-1].is_a?(Array)
-    puts sheet.first + ':'
-    puts '  ' + sheet.last.gsub("\r",'').gsub("\n", "\n  ").wrap
-  end
-  
-  def rm(sheet_file)
-    @git.remove(sheet_file)
-    @git.commit_all("-")
-  rescue Git::GitExecuteError
-    FileUtils.rm_rf(sheet_file)
-  end
-  
-  def add(sheet_file)
-    unless File.exist?(sheet_file)
-      breaker = sheet_file.rindex(File::Separator)+1
-      path = sheet_file[0,breaker]
-      title = @sheet.split(File::Separator).join('::')
-      FileUtils.mkdir_p(path)
-      yml = {"#{title}" => ''}.to_yaml
-      open(sheet_file, 'w') {|f| f << yml}
+    case format
+    when 'html'
+      puts "<h1>#{sheet.first}</h1>"
+      puts "<pre>#{sheet.last.gsub("\r",'').gsub("\n", "\n  ").wrap}</pre>"
+    else
+      puts sheet.first + ':'
+      puts '  ' + sheet.last.gsub("\r",'').gsub("\n", "\n  ").wrap      
     end
-    edit(sheet_file)
   end
   
-  def edit(sheet_file)
-    sheet = YAML.load(IO.read(sheet_file)).to_a.first
+  def rm(file)
+    @git.remove(file)
+    @git.commit_all("#{@sheet} removed")
+  rescue Git::GitExecuteError
+    FileUtils.rm_rf(file)
+  end
+  
+  def add(file)
+    unless File.exist?(file)
+      prepare_dir(file)
+      title = parse_title(@sheet)
+      yml = {"#{title}" => ''}.to_yaml
+      open(file, 'w') {|f| f << yml}
+    end
+    edit(file)
+  end
+  
+  def edit(file)
+    sheet = YAML.load(IO.read(file)).to_a.first
     sheet[-1] = sheet.last.gsub("\r", '')
     body, title = write_to_tempfile(*sheet), sheet.first
     if body.strip.empty?
-      rm(sheet_file)
+      rm(file)
     else
       begin
-        open(sheet_file,'w') {|f| f << {title => body}.to_yaml}
+        open(file,'w') {|f| f << {title => body}.to_yaml}
         @git.add
-        @git.commit_all("-")
+        st = @git.status
+        unless st.added.empty? && st.changed.empty? && st.deleted.empty? && st.untracked.empty?
+          @git.commit_all(" #{@sheet} updated")
       rescue Git::GitExecuteError
         puts "ERROR: can not commit #{@curr_repos} chit."
         puts $!
@@ -224,6 +253,15 @@ module Chit
   end
   
   private
+    def parse_title(sheet_name)
+      sheet_name.split(File::Separator).join('::')
+    end
+  
+    def prepare_dir(file)
+      breaker = file.rindex(File::Separator)+1
+      path = file[0,breaker]
+      FileUtils.mkdir_p(path)
+    end
   
     def editor
       ENV['VISUAL'] || ENV['EDITOR'] || "vim"

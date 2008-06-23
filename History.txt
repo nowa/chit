@@ -1,6 +1,14 @@
+=== 0.0.5 / 2008-06-21
+
+* move/rename with '--mv/-m'
+* html output with '--html'
+
 === 0.0.4 / 2008-06-20
 
 * unlimited repositoty
+* search content by adding switch '--search/-s'
+* find title by adding switch '--find/-f'
+* disable 'add when not found'. You can enable it by modifying config file.
 
 === 0.0.3 / 2008-06-20
 
