@@ -3,7 +3,7 @@ $:.unshift File.dirname(__FILE__)
 
 module Chit
   extend self
-  VERSION = '0.0.5'
+  VERSION = '0.0.6'
   
   defaults = {
     'root'  => File.join("#{ENV['HOME']}",".chit")
@@ -108,7 +108,7 @@ module Chit
   def search_title
     reg = Regexp.compile("^#{@sheet}")
     files = all_sheets.select {|sheet| sheet =~ reg }
-    puts files.sort.join("\n")
+    puts "  " + files.sort.join("\n  ")
     true
   end
   
@@ -138,7 +138,10 @@ module Chit
         puts "Private chit initialized."
       else
         puts "Initialize private chit from scratch to #{CONFIG['root']}/private"
-        Git.init(private_path)
+        git = Git.init(private_path)
+        FileUtils.touch(File.join(CONFIG['root'],'private','.gitignore'))
+        git.add
+        git.commit_all("init private repository")
         puts "Private chit initialized."
       end
     else
