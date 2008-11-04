@@ -247,6 +247,7 @@ module Chit
         st = @git.status
         unless st.added.empty? && st.changed.empty? && st.deleted.empty? && st.untracked.empty?
           @git.commit_all(" #{@sheet} updated")
+        end
       rescue Git::GitExecuteError
         puts "ERROR: can not commit #{@curr_repos} chit."
         puts $!
